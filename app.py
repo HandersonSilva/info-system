@@ -1,5 +1,7 @@
+import os, sys
 import platform,socket,psutil
 from tkinter import *
+
  
 def verificarSistema():
     info={}
@@ -17,6 +19,7 @@ def verificarSistema():
     info['cpu-freq-min']=str(round(psutil.cpu_freq().min))
     info['cpu-percent']=str(round(psutil.cpu_percent()))     
     info['ip']=socket.gethostbyname(socket.gethostname())
+    info['serial']=getMachine_addr()
    
     text = f'''
     platform: {info['platform']}
@@ -33,9 +36,20 @@ def verificarSistema():
     cpu-freq-min: {info['cpu-freq-min']} MHz
     cpu-percent: {info['cpu-percent']} %
     ip: {info['ip']}
+    serial: {info['serial']}
     '''
     text_info["text"] = text
 
+
+def getMachine_addr():
+	os_type = sys.platform.lower()
+	if "win" in os_type:
+		command = "wmic bios get serialnumber"
+	elif "linux" in os_type:
+		command = "dmidecode -s baseboard-serial-number"
+	elif "darwin" in os_type:
+		command = "ioreg -l | grep IOPlatformSerialNumber"
+	return os.popen(command).read().replace("\n","").replace("	","").replace(" ","")
 
 window = Tk()
 window.title("Get Info")
